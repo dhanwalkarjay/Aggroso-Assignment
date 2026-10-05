@@ -17,6 +17,14 @@ It is a completeness aid only. It does not decide legal compliance, eligibility,
 - Keeps document versions and analysis runs, and marks assessments stale after document changes.
 - Generates a reviewed summary with a permanent disclaimer.
 
+## Completed Scope
+
+The current implementation includes the home assessment workflow, sample loading, document uploads, supporting-document tracking, AI requirement extraction, evidence mapping, citation verification, user review actions, stale-version detection, run history, deterministic completion percentages, reviewed summaries, API error handling, retry behavior, local SQLite support, and Turso-compatible persistence.
+
+## Excluded Scope
+
+The application intentionally does not include authentication, multi-user permissions, external grant searching, grant submission, OCR, scanned-document parsing, financial forecasting, automatic application rewriting, legal advice, eligibility decisions, approval predictions, or funding recommendations.
+
 ## Technology
 
 - Next.js App Router and TypeScript
