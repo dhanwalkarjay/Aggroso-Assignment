@@ -1,8 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { loadEnvConfig } from "@next/env";
 
 import { logger } from "../src/lib/logger";
 import { runPipeline } from "../src/lib/ai/pipeline";
+
+loadEnvConfig(process.cwd());
 
 const samplePath = (name: string) =>
   resolve(process.cwd(), "samples", name);

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { logger } from "../logger";
 
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-20b";
 const MAX_ATTEMPTS = 3;
 const DEFAULT_RETRY_DELAYS = [1500, 3000];
 
@@ -108,6 +108,8 @@ export async function callJSON<T>(
       const response = await client.chat.completions.create({
         model: MODEL,
         temperature: 0,
+        reasoning_effort: "low",
+        max_completion_tokens: 4096,
         response_format: { type: "json_object" },
         messages: [
           { role: "system", content: system },
