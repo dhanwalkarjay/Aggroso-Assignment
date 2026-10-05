@@ -33,6 +33,7 @@ export default function AssessmentWorkspace() {
   const [editingKind, setEditingKind] = useState<"guideline" | "application" | "">("");
   const [editValue, setEditValue] = useState("");
   const [error, setError] = useState("");
+  const [retryAvailable, setRetryAvailable] = useState(false);
 
   const load = async (runId?: string) => {
     const query = runId ? `?runId=${encodeURIComponent(runId)}` : "";
@@ -88,8 +89,10 @@ export default function AssessmentWorkspace() {
       await load(result.id);
       const history = await fetch(`/api/assessments/${id}/runs`).then((runResponse) => runResponse.json() as Promise<Run[]>);
       setRuns(history);
+      setRetryAvailable(false);
     } catch (analysisError) {
       setError(analysisError instanceof Error ? analysisError.message : "Analysis could not be completed");
+      setRetryAvailable(true);
     } finally { setPending(false); }
   };
 
@@ -145,7 +148,7 @@ export default function AssessmentWorkspace() {
           <div className="version-stack"><span>Guideline v{data.latestDocuments.guideline?.version ?? "—"}</span><span>Application v{data.latestDocuments.application?.version ?? "—"}</span></div>
         </div>
         {data.stale && <div className="stale-banner"><span className="stale-icon">!</span><span><strong>This review is out of date.</strong> A document changed since the last analysis. Re-analyze to refresh the evidence suggestions.</span></div>}
-        {error && <div className="error-banner workspace-error" role="alert">{error}</div>}
+        {error && <div className="error-banner workspace-error" role="alert"><span>{error}</span>{retryAvailable && <button className="text-button" type="button" onClick={analyze} disabled={pending}>Retry analysis</button>}</div>}
 
         <div className="progress-grid">
           <ProgressBar label="Mandatory" value={progress[0]} accent="coral" />
@@ -160,7 +163,7 @@ export default function AssessmentWorkspace() {
 
           <section className="evidence-panel" aria-label="Application evidence">
             <div className="panel-title-row"><div><p className="eyebrow">DRAFT APPLICATION</p><h2>Source text</h2></div>{data.latestDocuments.application && <button className="text-button" type="button" onClick={() => { setEditingKind("application"); setEditValue(data.latestDocuments.application?.content ?? ""); }}>Edit application</button>}</div>
-            {editingKind === "application" ? <div className="edit-document"><textarea className="text-area large-area" value={editValue} onChange={(event) => setEditValue(event.target.value)} /><div className="edit-actions"><button className="button button-quiet" type="button" onClick={() => setEditingKind("")}>Cancel</button><button className="button button-primary" type="button" disabled={pending} onClick={saveDocument}>Save new version</button></div></div> : <div className="source-text">{highlightText(applicationText, selectedQuote)}</div>}
+            {editingKind ? <div className="edit-document"><p className="empty-inline">Editing the {editingKind} creates a new document version.</p><textarea className="text-area large-area" value={editValue} onChange={(event) => setEditValue(event.target.value)} minLength={200} maxLength={24000} /><div className="edit-actions"><button className="button button-quiet" type="button" onClick={() => setEditingKind("")}>Cancel</button><button className="button button-primary" type="button" disabled={pending || editValue.length < 200 || editValue.length > 24000} onClick={saveDocument}>Save new version</button></div></div> : <div className="source-text">{highlightText(applicationText, selectedQuote)}</div>}
             <div className="source-footer"><span>Guideline: v{data.latestDocuments.guideline?.version ?? "—"}</span><button className="text-button" type="button" onClick={() => { setEditingKind("guideline"); setEditValue(data.latestDocuments.guideline?.content ?? ""); }}>Edit guideline</button></div>
           </section>
         </div>

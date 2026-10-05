@@ -211,7 +211,7 @@ function DocumentField({ label, value, onChange }: { label: string; value: strin
         <label className="field-label" htmlFor={label}>{label}</label>
         <label className="file-button">Upload .txt/.md<input id={label} type="file" accept=".txt,.md,text/plain,text/markdown" onChange={(event) => void readTextFile(event, onChange)} /></label>
       </div>
-      <textarea className="text-area" value={value} onChange={(event) => onChange(event.target.value)} placeholder={`Paste the ${label.toLowerCase()} here…`} required />
+      <textarea className="text-area" value={value} onChange={(event) => onChange(event.target.value)} placeholder={`Paste the ${label.toLowerCase()} here…`} minLength={200} maxLength={24000} required />
       <span className="character-count">{value.length.toLocaleString()} characters</span>
     </div>
   );

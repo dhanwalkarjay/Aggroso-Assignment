@@ -14,6 +14,7 @@ type ErrorWithDetails = {
 
 export type CallJsonOptions = {
   sleep?: (milliseconds: number) => Promise<void>;
+  client?: Groq;
 };
 
 export class AiServiceError extends Error {
@@ -70,9 +71,16 @@ const getRetryAfterMilliseconds = (error: unknown) => {
     : undefined;
 };
 
+const isTimeoutError = (error: unknown) =>
+  error instanceof Error &&
+  (error.name === "TimeoutError" ||
+    error.message.toLowerCase().includes("timeout") ||
+    error.message.toLowerCase().includes("timed out"));
+
 const isRetryableError = (error: unknown) => {
   const status = getStatus(error);
   return (
+    isTimeoutError(error) ||
     error instanceof SyntaxError ||
     error instanceof z.ZodError ||
     status === 429 ||
@@ -89,7 +97,7 @@ export async function callJSON<T>(
   schema: z.ZodType<T>,
   options: CallJsonOptions = {},
 ): Promise<T> {
-  const client = getClient();
+  const client = options.client ?? getClient();
   const sleep = options.sleep ?? defaultSleep;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
@@ -105,7 +113,7 @@ export async function callJSON<T>(
           { role: "system", content: system },
           { role: "user", content: user },
         ],
-      });
+      }, { timeout: 45_000 });
       status = 200;
       const content = response.choices[0]?.message?.content;
 

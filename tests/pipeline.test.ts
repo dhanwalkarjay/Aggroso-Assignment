@@ -99,4 +99,15 @@ describe("AI pipeline post-processing", () => {
     ).rejects.toBeInstanceOf(PipelineInputError);
     expect(mockedCallJSON).not.toHaveBeenCalled();
   });
+
+  it("rejects documents above the maximum length before calling AI", async () => {
+    await expect(
+      runPipeline({
+        guideline: `${"x".repeat(24_001)}`,
+        application,
+        supportingDocs: [],
+      }),
+    ).rejects.toBeInstanceOf(PipelineInputError);
+    expect(mockedCallJSON).not.toHaveBeenCalled();
+  });
 });
